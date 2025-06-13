@@ -1,0 +1,149 @@
+/* src/pages/restoran/[uid]/menu.module.css */
+
+.container {
+  min-height: 100vh;
+  background-color: #f3f4f6; /* Tailwind'deki gray-100'e benzer */
+  padding: 2.5rem; /* ~p-10 */
+  font-family: Arial, sans-serif;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  background-color: #fff;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Tailwind'deki shadow-md'ye benzer */
+  border-radius: 0.5rem; /* Tailwind'deki rounded-lg'ye benzer */
+  padding: 1.5rem; /* ~p-6 */
+  margin-bottom: 2rem; /* ~mb-8 */
+  text-align: center;
+}
+
+.header h1 {
+  font-size: 2.25rem; /* ~text-4xl */
+  font-weight: 700; /* ~font-bold */
+  color: #1f2937; /* Tailwind'deki gray-800'e benzer */
+  margin-bottom: 0.5rem;
+}
+
+.header p {
+  font-size: 1.125rem; /* ~text-lg */
+  color: #4b5563; /* Tailwind'deki gray-600'e benzer */
+}
+
+.header p span {
+  font-weight: 600; /* ~font-semibold */
+}
+
+.noMenuMessage {
+  background-color: #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  text-align: center;
+  color: #4b5563;
+  font-size: 1.25rem; /* ~text-xl */
+}
+
+.menuGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem; /* ~gap-6 */
+}
+
+.menuCard {
+  background-color: #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* ~shadow-lg */
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.menuCard:hover {
+  transform: scale(1.03); /* ~hover:scale-105 */
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); /* ~hover:shadow-xl */
+}
+
+.menuImageContainer {
+  width: 100%;
+  height: 12rem; /* ~h-48 */
+  background-color: #e5e7eb; /* ~bg-gray-200 */
+  overflow: hidden;
+}
+
+.menuImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cardContent {
+  padding: 1.25rem; /* ~p-5 */
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.cardContent h3 {
+  font-size: 1.25rem; /* ~text-xl */
+  font-weight: 600; /* ~font-semibold */
+  color: #1a202c; /* ~text-gray-900 */
+  margin-bottom: 0.5rem;
+}
+
+.cardContent .price {
+  font-size: 1.5rem; /* ~text-2xl */
+  font-weight: 700; /* ~font-bold */
+  color: #10b981; /* ~text-green-600 */
+  margin-bottom: 0.75rem;
+}
+
+.cardContent p {
+  margin: 0.25rem 0;
+  font-size: 0.875rem; /* ~text-sm */
+  color: #4b5563; /* ~text-gray-700 */
+}
+
+.cardContent p span {
+  font-weight: 500; /* ~font-medium */
+}
+
+.cardContent .description {
+  margin-bottom: 0.75rem;
+  flex-grow: 1;
+}
+
+.cardContent .date {
+  font-size: 0.75rem; /* ~text-xs */
+  color: #6b7280; /* ~text-gray-500 */
+  margin-top: 0.5rem;
+}
+
+/* Responsive Düzenlemeler (Medya Sorguları) */
+@media (min-width: 640px) { /* sm breakpoint */
+  .container {
+    padding: 2rem; /* ~p-8 */
+  }
+  .menuGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .header h1 {
+    font-size: 2.5rem; /* ~text-4xl */
+  }
+}
+
+@media (min-width: 1024px) { /* lg breakpoint */
+  .container {
+    padding: 2.5rem; /* ~p-10 */
+  }
+  .menuGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) { /* xl breakpoint */
+  .menuGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
