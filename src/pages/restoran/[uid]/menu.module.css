@@ -110,15 +110,17 @@
 }
 
 .cardContent .description {
-  margin-bottom: 0.75rem;
+  margin-top: 0.5rem; /* Yeni eklenen stil */
+  margin-bottom: 1rem; /* Yeni eklenen stil */
   flex-grow: 1;
 }
 
-.cardContent .date {
-  font-size: 0.75rem; /* ~text-xs */
-  color: #6b7280; /* ~text-gray-500 */
+/* date class'i kaldırıldığı için bu stil artık gerekli değil */
+/* .cardContent .date {
+  font-size: 0.75rem;
+  color: #6b7280;
   margin-top: 0.5rem;
-}
+} */
 
 /* Responsive Düzenlemeler (Medya Sorguları) */
 @media (min-width: 640px) { /* sm breakpoint */
@@ -146,4 +148,34 @@
   .menuGrid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
+}
+
+/* Kategori Bölümü Stilleri */
+.categorySection {
+  margin-bottom: 3rem; /* Kategoriler arasında boşluk */
+  background-color: #fff;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Hafif gölge */
+}
+
+.categoryTitle {
+  font-size: 1.875rem; /* text-3xl */
+  font-weight: 700; /* font-bold */
+  color: #334155; /* slate-700 */
+  margin-bottom: 0.5rem;
+  display: flex; /* İkon ve metni yan yana hizalamak için */
+  align-items: center; /* Dikeyde ortalamak için */
+}
+
+.categoryIcon { /* İkonun kendisine uygulanan stil */
+  font-size: 2.2rem; /* İkon boyutunu belirginleştir */
+  line-height: 1; /* Metinle hizalamayı iyileştirmek için */
+  margin-right: 0.75rem; /* İkon ile başlık metni arasına boşluk */
+}
+
+.categoryDescription {
+  font-size: 1rem; /* text-base */
+  color: #64748b; /* slate-500 */
+  margin-bottom: 1.5rem;
 }
