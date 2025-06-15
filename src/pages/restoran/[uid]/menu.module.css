@@ -1,181 +1,184 @@
-/* src/pages/restoran/[uid]/menu.module.css */
-
+/* Genel Kapsayıcı */
 .container {
-  min-height: 100vh;
-  background-color: #f3f4f6; /* Tailwind'deki gray-100'e benzer */
-  padding: 2.5rem; /* ~p-10 */
-  font-family: Arial, sans-serif;
   max-width: 1200px;
   margin: 0 auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  color: #333;
 }
 
+/* Başlık ve Açıklama */
 .header {
-  background-color: #fff;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Tailwind'deki shadow-md'ye benzer */
-  border-radius: 0.5rem; /* Tailwind'deki rounded-lg'ye benzer */
-  padding: 1.5rem; /* ~p-6 */
-  margin-bottom: 2rem; /* ~mb-8 */
   text-align: center;
+  margin-bottom: 40px;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .header h1 {
-  font-size: 2.25rem; /* ~text-4xl */
-  font-weight: 700; /* ~font-bold */
-  color: #1f2937; /* Tailwind'deki gray-800'e benzer */
-  margin-bottom: 0.5rem;
+  font-size: 2.5em;
+  color: #333;
+  margin-bottom: 10px;
 }
 
 .header p {
-  font-size: 1.125rem; /* ~text-lg */
-  color: #4b5563; /* Tailwind'deki gray-600'e benzer */
+  font-size: 1.1em;
+  color: #666;
 }
 
-.header p span {
-  font-weight: 600; /* ~font-semibold */
-}
-
-.noMenuMessage {
-  background-color: #fff;
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  padding: 1.5rem;
-  text-align: center;
-  color: #4b5563;
-  font-size: 1.25rem; /* ~text-xl */
-}
-
-.menuGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem; /* ~gap-6 */
-}
-
-.menuCard {
-  background-color: #fff;
-  border-radius: 0.5rem;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* ~shadow-lg */
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-}
-
-.menuCard:hover {
-  transform: scale(1.03); /* ~hover:scale-105 */
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); /* ~hover:shadow-xl */
-}
-
-.menuImageContainer {
-  width: 100%;
-  height: 12rem; /* ~h-48 */
-  background-color: #e5e7eb; /* ~bg-gray-200 */
-  overflow: hidden;
-}
-
-.menuImage {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.cardContent {
-  padding: 1.25rem; /* ~p-5 */
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-}
-
-.cardContent h3 {
-  font-size: 1.25rem; /* ~text-xl */
-  font-weight: 600; /* ~font-semibold */
-  color: #1a202c; /* ~text-gray-900 */
-  margin-bottom: 0.5rem;
-}
-
-.cardContent .price {
-  font-size: 1.5rem; /* ~text-2xl */
-  font-weight: 700; /* ~font-bold */
-  color: #10b981; /* ~text-green-600 */
-  margin-bottom: 0.75rem;
-}
-
-.cardContent p {
-  margin: 0.25rem 0;
-  font-size: 0.875rem; /* ~text-sm */
-  color: #4b5563; /* ~text-gray-700 */
-}
-
-.cardContent p span {
-  font-weight: 500; /* ~font-medium */
-}
-
-.cardContent .description {
-  margin-top: 0.5rem; /* Yeni eklenen stil */
-  margin-bottom: 1rem; /* Yeni eklenen stil */
-  flex-grow: 1;
-}
-
-/* date class'i kaldırıldığı için bu stil artık gerekli değil */
-/* .cardContent .date {
-  font-size: 0.75rem;
-  color: #6b7280;
-  margin-top: 0.5rem;
-} */
-
-/* Responsive Düzenlemeler (Medya Sorguları) */
-@media (min-width: 640px) { /* sm breakpoint */
-  .container {
-    padding: 2rem; /* ~p-8 */
-  }
-  .menuGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .header h1 {
-    font-size: 2.5rem; /* ~text-4xl */
-  }
-}
-
-@media (min-width: 1024px) { /* lg breakpoint */
-  .container {
-    padding: 2.5rem; /* ~p-10 */
-  }
-  .menuGrid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1280px) { /* xl breakpoint */
-  .menuGrid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-/* Kategori Bölümü Stilleri */
+/* Kategori Bölümü */
 .categorySection {
-  margin-bottom: 3rem; /* Kategoriler arasında boşluk */
-  background-color: #fff;
-  padding: 1.5rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Hafif gölge */
+  margin-bottom: 40px;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .categoryTitle {
-  font-size: 1.875rem; /* text-3xl */
-  font-weight: 700; /* font-bold */
-  color: #334155; /* slate-700 */
-  margin-bottom: 0.5rem;
-  display: flex; /* İkon ve metni yan yana hizalamak için */
-  align-items: center; /* Dikeyde ortalamak için */
+  font-size: 2em;
+  color: #555;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px; /* İkon ile metin arasına boşluk */
 }
 
-.categoryIcon { /* İkonun kendisine uygulanan stil */
-  font-size: 2.2rem; /* İkon boyutunu belirginleştir */
-  line-height: 1; /* Metinle hizalamayı iyileştirmek için */
-  margin-right: 0.75rem; /* İkon ile başlık metni arasına boşluk */
+.categoryIcon {
+  color: darkorange; 
+  font-size: 1.2em;
 }
 
 .categoryDescription {
-  font-size: 1rem; /* text-base */
-  color: #64748b; /* slate-500 */
-  margin-bottom: 1.5rem;
+  font-size: 0.95em;
+  color: #777;
+  margin-bottom: 25px;
+  line-height: 1.5;
+}
+
+/* Menü Izgarası */
+.menuGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Daha iyi responsive için minmax */
+  gap: 25px;
+}
+
+/* Menü Kartları */
+.menuCard {
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden; /* Taşan içeriği gizle */
+  display: flex; /* İçeriği esnek hale getir */
+  flex-direction: column; /* İçeriği dikey sırala */
+  transition: transform 0.2s ease-in-out;
+}
+
+.menuCard:hover {
+  transform: translateY(-5px);
+}
+
+.menuImageContainer {
+  width: 100%; /* Konteyner kartın tüm genişliğini kaplasın */
+  /* height: 200px; /* Sabit yükseklik yerine, aspect-ratio kullanarak daha dinamik yapabiliriz */
+  padding-bottom: 65%; /* 16:9 oranı için, görselin yüksekliği otomatik ayarlanır */
+  position: relative;
+  overflow: hidden; /* Taşmayı engelle */
+  background-color: #e0e0e0; /* Resim yüklenirken arka plan */
+}
+
+.menuImage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Resmi kutuya sığdırırken oranları koru ve kutuyu doldur */
+  display: block; /* Gereksiz boşlukları engelle */
+}
+
+.cardContent {
+  padding: 20px;
+  flex-grow: 1; /* İçerik boşluğu doldursun */
+  display: flex;
+  flex-direction: column;
+}
+
+.cardContent h3 {
+  font-size: 1.4em;
+  color: #333;
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.price {
+  font-size: 1.2em;
+  color: #e44d26; 
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.description {
+  font-size: 0.9em;
+  color: #666;
+  line-height: 1.4;
+  flex-grow: 1; /* Açıklama alanı kalan boşluğu doldursun */
+  margin-bottom: 10px; /* Alt boşluk */
+}
+
+/* Mobil Cihazlar İçin Optimizasyon */
+@media (max-width: 768px) {
+  .header h1 {
+    font-size: 2em;
+  }
+
+  .categoryTitle {
+    font-size: 1.6em;
+  }
+
+  .menuGrid {
+    grid-template-columns: 1fr; /* Küçük ekranlarda tek sütun */
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 15px;
+  }
+
+  .header h1 {
+    font-size: 1.8em;
+  }
+
+  .header p {
+    font-size: 1em;
+  }
+
+  .categoryTitle {
+    font-size: 1.4em;
+  }
+
+  .menuCard {
+    padding-bottom: 15px; /* Kart içeriğine alt boşluk */
+  }
+
+  .cardContent {
+    padding: 15px;
+  }
+
+  .cardContent h3 {
+    font-size: 1.2em;
+  }
+
+  .price {
+    font-size: 1.1em;
+  }
+
+  .description {
+    font-size: 0.85em;
+  }
 }

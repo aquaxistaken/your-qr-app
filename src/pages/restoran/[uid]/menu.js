@@ -1,142 +1,187 @@
-// src/pages/restoran/[uid]/menu.js
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
-import { db } from '../../../lib/firebase';
-import styles from './menu.module.css';
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
+// Firestore için gerekli fonksiyonları import ediyoruz:
+// doc ve getDoc tek bir belgeyi çekmek için,
+// collection, query ve getDocs koleksiyonlardaki belgeleri çekmek için.
+import { doc, getDoc, collection, query, getDocs } from 'firebase/firestore';
+import { db } from '../../../lib/firebase'; // Firebase bağlantı dosyanızın yolu
 
-// Kategori sabitleri (Firebase'den gelen değerlere göre güncellendi)
-const ConsRestaurantMenuCategory = {
-  APPETIZERS_LIGHT_BITES: "Appetizers & Light Bites", // Firebase ile eşleşmeli
-  SIGNATURE_MAINS: "Signature Mains", // Firebase ile eşleşmeli
-  ELEGANT_DESSERTS: "Elegant Desserts", // Firebase ile eşleşmeli
-  BEVERAGES_REFRESHMENTS: "Beverages & Refreshments", // Firebase ile eşleşmeli
+import styles from './menu.module.css'; // menu.module.css dosyasının yolu
+
+// Font Awesome ikonları için gerekli import'lar
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faUtensils,
+  faCocktail,
+  faCoffee,
+  faBreadSlice,
+  faDrumstickBite,
+  faFish,
+  faIceCream,
+  faCandyCane,
+  faLeaf,
+  faWineGlass,
+  faCookieBite,
+  faPizzaSlice,
+  faCheese,
+  faAppleAlt,
+  faLemon,
+  faBirthdayCake,
+  faHotdog,
+  faHamburger,
+  faCarrot,
+  faMugHot,
+  faGlassMartiniAlt,
+  faBlender,
+  faSeedling,
+  faShoppingBasket,
+  faChampagneGlasses,
+  faLemonade,
+  faCroissant,
+  faCakeCandles,
+  faIceCreamBowl,
+  faGlassWater,
+  faShrimp,
+  faDrumstick,
+  faFishFins
+} from '@fortawesome/free-solid-svg-icons';
+
+// Kategori Metinleri ve İkonları
+// NOT: Firebase'deki "category" alanındaki değerlerle BİREBİR EŞLEŞMELİDİR.
+// Büyük/küçük harf ve özel karakterler dahil.
+// Kategori Metinleri ve İkonları
+const categoryConfig = {
+  // Firebase'deki "category" alanındaki değerlerle BİREBİR EŞLEŞMELİDİR.
+  // Büyük/küçük harf ve özel karakterler dahil.
+  "Appetizers & Light Bites": { // Firebase'den gelen kategori adı
+    text: 'Başlangıçlar & Hafif Atıştırmalıklar', // Gösterilecek Türkçe metin
+    description: 'Hafif ve iştah açıcı lezzetlerle yemeğinize keyifli bir başlangıç yapın.',
+    icon: faBreadSlice,
+  },
+  "Signature Mains": { // Firebase'den gelen kategori adı
+    text: 'Ana Yemekler & İmza Yemekleri', // Gösterilecek Türkçe metin
+    description: 'Şeflerimizin özenle hazırladığı, unutulmaz ana yemeklerimizi deneyimleyin.',
+    icon: faDrumstickBite,
+  },
+  "Beverages & Refreshments": { // Firebase'den gelen kategori adı
+    text: 'İçecekler & Ferahlatıcılar', // Gösterilecek Türkçe metin
+    description: 'Serinletici ve ferahlatıcı içeceklerimizle anın tadını çıkarın.',
+    icon: faGlassMartiniAlt, // Daha uygun bir ikon seçebilirsiniz
+  },
+  // Eğer Firebase'de başka kategori isimleri varsa, onları da buraya eklemelisiniz.
+  // Örneğin: "Deniz Ürünleri" için Firebase'de ne yazıyorsa onu anahtar olarak kullanın.
+  // Sadece örnekler, Firebase'deki tam karşılıklarını kullanmalısınız:
+  // "Seafood": { text: 'Deniz Ürünleri', description: 'En taze deniz mahsullerinden hazırlanan özel lezzetler.', icon: faFish, },
+  // "Salads": { text: 'Salatalar', description: 'Sağlıklı ve ferahlatıcı salata çeşitlerimizle öğününüzü hafifletin.', icon: faLeaf, },
+  // "Desserts & Pastries": { text: 'Tatlılar & Pastalar', description: 'Yemeğinizin ardından damaklarınızı şenlendirecek tatlı kaçamaklar.', icon: faBirthdayCake, },
+  // "Hot Drinks": { text: 'Sıcak İçecekler', description: 'Sıcak sohbetlerinize eşlik edecek, özenle demlenmiş içecekler.', icon: faMugHot, },
 };
 
-const ConsCafeMenuCategory = {
-  ARTISAN_BITES: "Artisan Bites", // Firebase ile eşleşmeli
-  BREAKFAST_BRUNCH: "Breakfast & Brunch", // Firebase ile eşleşmeli
-  LIGHT_PLATES_SALADS: "Light Plates & Salads", // Firebase ile eşleşmeli
-  SIGNATURE_PLATES: "Signature Plates", // Firebase ile eşleşmeli
-  SPECIALTY_DRINKS: "Specialty Drinks", // Firebase ile eşleşmeli
-  HOMEMADE_SWEETS: "Homemade Sweets", // Firebase ile eşleşmeli
-};
+const MenuPage = () => {
+  const router = useRouter();
+  const { uid } = router.query;
+  const [menuItems, setMenuItems] = useState([]);
+  const [restaurantName, setRestaurantName] = useState('Yükleniyor...');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-// Kategori ikonları
-const getMenuCategoryStartIcon = (category) => {
-  switch (category) {
-    // Restaurant kategorileri
-    case ConsRestaurantMenuCategory.APPETIZERS_LIGHT_BITES: return "🥂";
-    case ConsRestaurantMenuCategory.SIGNATURE_MAINS: return "🍽️";
-    case ConsRestaurantMenuCategory.ELEGANT_DESSERTS: return "🎂";
-    case ConsRestaurantMenuCategory.BEVERAGES_REFRESHMENTS: return "🍷";
-    // Cafe kategorileri
-    case ConsCafeMenuCategory.ARTISAN_BITES: return "🥐";
-    case ConsCafeMenuCategory.BREAKFAST_BRUNCH: return "🍳";
-    case ConsCafeMenuCategory.LIGHT_PLATES_SALADS: return "🥗";
-    case ConsCafeMenuCategory.SIGNATURE_PLATES: return "🍽️";
-    case ConsCafeMenuCategory.SPECIALTY_DRINKS: return "☕";
-    case ConsCafeMenuCategory.HOMEMADE_SWEETS: return "🍰";
-    default: return "";
-  }
-};
+  console.log("router.query.uid:", uid); // UID'nin doğru geldiğini kontrol etmek için
 
-// Kategori metinleri (Display için kullanılan kısa isimler)
-const categoryTexts = {
-  "category": "Category", // Varsayılan veya bilinmeyen kategori
-  [ConsRestaurantMenuCategory.APPETIZERS_LIGHT_BITES]: "Başlangıçlar & Hafif Atıştırmalıklar",
-  [ConsRestaurantMenuCategory.SIGNATURE_MAINS]: "Ana Yemekler & İmza Yemekleri",
-  [ConsRestaurantMenuCategory.ELEGANT_DESSERTS]: "Zarif Tatlılar",
-  [ConsRestaurantMenuCategory.BEVERAGES_REFRESHMENTS]: "İçecekler & Serinleticiler",
-  [ConsCafeMenuCategory.ARTISAN_BITES]: "El Yapımı Lezzetler",
-  [ConsCafeMenuCategory.BREAKFAST_BRUNCH]: "Kahvaltı & Brunch",
-  [ConsCafeMenuCategory.LIGHT_PLATES_SALADS]: "Hafif Tabaklar & Salatalar",
-  [ConsCafeMenuCategory.SIGNATURE_PLATES]: "Özel Tabaklar",
-  [ConsCafeMenuCategory.SPECIALTY_DRINKS]: "Özel İçecekler",
-  [ConsCafeMenuCategory.HOMEMADE_SWEETS]: "Ev Yapımı Tatlılar",
-};
-
-// Kategori başlıkları (Açıklayıcı metinler)
-const categoryTitles = {
-  [ConsRestaurantMenuCategory.APPETIZERS_LIGHT_BITES]: "Hafif ve iştah açıcı lezzetlerle yemeğinize zarif bir başlangıç yapın.",
-  [ConsRestaurantMenuCategory.SIGNATURE_MAINS]: "Ustalıkla hazırlanmış doyurucu ve özenli ana yemek seçenekleri.",
-  [ConsRestaurantMenuCategory.ELEGANT_DESSERTS]: "Yemeğinizi zarif bir şekilde bitirecek tatlı dokunuşlar.",
-  [ConsRestaurantMenuCategory.BEVERAGES_REFRESHMENTS]: "Yemeklerinizi tamamlayacak serinletici içecek alternatifleri.",
-  [ConsCafeMenuCategory.ARTISAN_BITES]: "Benzersiz ve el yapımı ısırıklık lezzetler.",
-  [ConsCafeMenuCategory.BREAKFAST_BRUNCH]: "Gününüz için mükemmel başlangıçlar.",
-  [ConsCafeMenuCategory.LIGHT_PLATES_SALADS]: "Sağlıklı bir öğün için taze ve hafif seçenekler.",
-  [ConsCafeMenuCategory.SIGNATURE_PLATES]: "Mutfağımızdan özel olarak hazırlanmış yemekler.",
-  [ConsCafeMenuCategory.SPECIALTY_DRINKS]: "Benzersiz ve ferahlatıcı içecekler.",
-  [ConsCafeMenuCategory.HOMEMADE_SWEETS]: "Anlarınızı tatlandıracak lezzetli ev yapımı tatlılar.",
-};
-
-
-export async function getServerSideProps(context) {
-  const { uid } = context.params;
-  const countryName = 'Turkey';
-
-  let menuler = [];
-  let notFound = false;
-
-  try {
-    const menuCollectionRef = collection(db, 'RestaurantMenu', uid, countryName);
-    // dateOfCreation alanına göre artan (eskiden yeniye) sıralama
-    const q = query(menuCollectionRef, orderBy('dateOfCreation', 'asc'));
-    const querySnapshot = await getDocs(q);
-
-    if (querySnapshot.empty) {
-      console.log(`Menü öğesi bulunamadı: Restaurant UID: ${uid}, Ülke: ${countryName}`);
-      notFound = true;
-    } else {
-      menuler = querySnapshot.docs.map(doc => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          ...data,
-          // Firestore Timestamp objesini JavaScript Date objesine çevirip ISO string olarak saklıyoruz
-          dateOfCreation: data.dateOfCreation ? data.dateOfCreation.toDate().toISOString() : null,
-        };
-      });
+  useEffect(() => {
+    if (!uid) {
+      console.log("UID bulunamadı, menü çekilemiyor.");
+      return;
     }
 
-  } catch (error) {
-    console.error('Menü verisi çekilirken hata oluştu:', error);
-    notFound = true;
-  }
+    const fetchMenu = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        // Restoran adını getirme (opsiyonel, eğer restoran adını da göstermek istiyorsanız)
+        // KOLEKSİYON ADI DÜZELTİLDİ: 'restaurants' -> 'RestaurantMenu'
+        const restaurantDocRef = doc(db, 'RestaurantMenu', uid);
+        const restaurantDocSnap = await getDoc(restaurantDocRef);
 
-  if (notFound) {
-    return {
-      notFound: true,
+        let currentRestaurantName = `Menü (${uid})`;
+        if (restaurantDocSnap.exists()) {
+          currentRestaurantName = restaurantDocSnap.data().name || `Menü (${uid})`;
+        }
+        setRestaurantName(currentRestaurantName);
+
+        // Menü öğelerini getirme
+        let items = [];
+        // KOLEKSİYON ADI DÜZELTİLDİ: 'restaurants' -> 'RestaurantMenu'
+        const menuCollectionRef = collection(db, `RestaurantMenu/${uid}/Turkey`); // Turkey'i alt koleksiyon olarak deniyoruz
+        const q = query(menuCollectionRef);
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) { // Eğer alt koleksiyonda veri varsa
+          querySnapshot.forEach((docItem) => {
+            items.push({ id: docItem.id, ...docItem.data() });
+          });
+          console.log("Turkey alt koleksiyon olarak çekildi:", items);
+        } else {
+          // Eğer Turkey bir alt koleksiyon değil de, restoran belgesinin içinde bir map (harita) ise
+          // (Bu senaryo Firebase yapınıza göre geçerli değil, ama güvenlik için önceki kontrolü tutuyoruz)
+          if (restaurantDocSnap.exists()) {
+            const data = restaurantDocSnap.data();
+            if (data.Turkey && typeof data.Turkey === 'object') {
+              // Turkey içindeki her öğeyi alıp diziye dönüştür
+              items = Object.keys(data.Turkey).map(key => ({
+                id: key, // Harita anahtarını ID olarak kullan
+                ...data.Turkey[key] // Tüm alt alanları yay
+              }));
+              console.log("Turkey bir field/map olarak çekildi (Bu durum beklenmiyor):", items);
+            }
+          }
+        }
+
+        console.log("Çekilen Menü Öğeleri (Son Kontrol):", items);
+
+        // dateOfCreation'a göre sıralama (eskiden yeniye)
+        items.sort((a, b) => {
+          // dateOfCreation alanı Firestore Timestamp ise toDate() metodu kullanılır.
+          // Değilse doğrudan yeni bir Date objesi oluşturulur.
+          const dateA = a.dateOfCreation ? (a.dateOfCreation.toDate ? a.dateOfCreation.toDate() : new Date(a.dateOfCreation)) : new Date(0);
+          const dateB = b.dateOfCreation ? (b.dateOfCreation.toDate ? b.dateOfCreation.toDate() : new Date(b.dateOfCreation)) : new Date(0);
+          return dateA - dateB;
+        });
+
+        setMenuItems(items);
+      } catch (err) {
+        console.error("Menü yüklenirken hata oluştu: ", err);
+        setError("Menü yüklenirken bir hata oluştu: " + err.message); // Hata mesajını daha açıklayıcı yapalım
+      } finally {
+        setLoading(false);
+      }
     };
+
+    fetchMenu();
+  }, [uid]); // uid değiştiğinde useEffect'in tekrar çalışmasını sağla
+
+  if (loading) {
+    return <div className={styles.container}>Yükleniyor...</div>;
   }
 
-  return {
-    props: {
-      restaurantUID: uid,
-      menuler,
-    },
-  };
-}
+  if (error) {
+    return <div className={styles.container}>{error}</div>;
+  }
 
-function MenuSayfasi({ restaurantUID, menuler }) {
-  if (!menuler || menuler.length === 0) {
+  // Menü öğeleri yoksa mesaj göster
+  if (menuItems.length === 0) {
     return (
       <div className={styles.container}>
-        <header className={styles.header}>
-          <h1>Restoran Menüsü</h1>
-          <p>
-            <span>UID:</span> {restaurantUID}
-          </p>
-        </header>
-        <div className={styles.noMenuMessage}>
-          <p>Bu restorana ait menü bulunmamaktadır.</p>
+        <div className={styles.header}>
+          <h1>{restaurantName}</h1>
+          <p>Şu anda menüde hiç öğe bulunmuyor.</p>
         </div>
       </div>
     );
   }
 
-  // Menü öğelerini kategoriye göre gruplandırma
-  const groupedMenus = menuler.reduce((acc, item) => {
-    // Firebase'den gelen 'category' alanını doğrudan kullanıyoruz
-    const category = item.category || 'Diğer'; // Eğer kategori yoksa 'Diğer' olarak gruplandır
+  // Kategorilere göre gruplama
+  const groupedByCategory = menuItems.reduce((acc, item) => {
+    const category = item.category || 'Diger'; // Kategori yoksa 'Diger' altında topla
     if (!acc[category]) {
       acc[category] = [];
     }
@@ -144,91 +189,82 @@ function MenuSayfasi({ restaurantUID, menuler }) {
     return acc;
   }, {});
 
-  // Kategori sıralaması: Display isimlerine göre manuel bir sıra belirleyelim
-  const categoryOrder = [
-    ConsRestaurantMenuCategory.APPETIZERS_LIGHT_BITES,
-    ConsRestaurantMenuCategory.SIGNATURE_MAINS,
-    ConsRestaurantMenuCategory.ELEGANT_DESSERTS,
-    ConsRestaurantMenuCategory.BEVERAGES_REFRESHMENTS,
-    ConsCafeMenuCategory.ARTISAN_BITES,
-    ConsCafeMenuCategory.BREAKFAST_BRUNCH,
-    ConsCafeMenuCategory.LIGHT_PLATES_SALADS,
-    ConsCafeMenuCategory.SIGNATURE_PLATES,
-    ConsCafeMenuCategory.SPECIALTY_DRINKS,
-    ConsCafeMenuCategory.HOMEMADE_SWEETS,
-    'Diğer' // Tanımlanmamış kategoriler en sonda
-  ];
-
-  const sortedCategories = Object.keys(groupedMenus).sort((a, b) => {
-    const indexA = categoryOrder.indexOf(a);
-    const indexB = categoryOrder.indexOf(b);
-
-    // Eğer kategori listede yoksa, "Diğer" olarak muamele et veya alfabetik sırala
-    if (indexA === -1 && indexB === -1) return a.localeCompare(b);
-    if (indexA === -1) return 1; // a listede yoksa b'den sonra gelsin
-    if (indexB === -1) return -1; // b listede yoksa a'dan önce gelsin
-    return indexA - indexB; // Listede olanları sıraya göre
+  // Kategori sıralamasını belirleme (Opsiyonel: İsterseniz elle sıralayabilirsiniz)
+  const sortedCategories = Object.keys(groupedByCategory).sort((a, b) => {
+    const configA = categoryConfig[a] || { order: 999 };
+    const configB = categoryConfig[b] || { order: 999 };
+    return configA.order - configB.order;
   });
-
 
   return (
     <div className={styles.container}>
-      <header className={styles.header}>
-        <h1>Restoran Menüsü</h1>
-        <p>
-          <span>UID:</span> {restaurantUID}
-        </p>
-      </header>
+      <div className={styles.header}>
+        <h1>{restaurantName}</h1>
+        <p>Restoranımızın lezzetli menüsünü keşfedin.</p>
+      </div>
 
-      {sortedCategories.map(category => (
-        <div key={category} className={styles.categorySection}>
-          <h2 className={styles.categoryTitle}>
-            {/* İkonu ayrı bir span içine aldık ve stil sınıfı verdik */}
-            <span className={styles.categoryIcon}>{getMenuCategoryStartIcon(category)}</span>
-            {categoryTexts[category] || category}
-          </h2>
-          <p className={styles.categoryDescription}>
-            {categoryTitles[category] || ""}
-          </p>
-          <div className={styles.menuGrid}>
-            {groupedMenus[category].map(item => (
-              <div
-                key={item.id}
-                className={styles.menuCard}
-              >
-                {item.photo && (
-                  <div className={styles.menuImageContainer}>
-                    <img
-                      src={item.photo}
-                      alt={item.name}
-                      className={styles.menuImage}
-                    />
+      {sortedCategories.map((categoryKey) => {
+        const categoryInfo = categoryConfig[categoryKey] || {
+          text: categoryKey,
+          description: '',
+          icon: faUtensils, // Varsayılan ikon
+        };
+        const itemsInCategory = groupedByCategory[categoryKey];
+
+        if (itemsInCategory.length === 0) return null; // Kategori boşsa gösterme
+
+        return (
+          <section key={categoryKey} className={styles.categorySection}>
+            <h2 className={styles.categoryTitle}>
+              {categoryInfo.icon && (
+                <FontAwesomeIcon icon={categoryInfo.icon} className={styles.categoryIcon} />
+              )}
+              {categoryInfo.text}
+            </h2>
+            {categoryInfo.description && (
+              <p className={styles.categoryDescription}>
+                {categoryInfo.description}
+              </p>
+            )}
+            <div className={styles.menuGrid}>
+              {itemsInCategory.map((item) => (
+                <div
+                  key={item.id}
+                  className={styles.menuCard}
+                >
+                  {item.photo && (
+                    <div className={styles.menuImageContainer}>
+                      <img
+                        src={item.photo}
+                        alt={item.name}
+                        className={styles.menuImage}
+                      />
+                    </div>
+                  )}
+                  <div className={styles.cardContent}>
+                    <h3>{item.name}</h3>
+                    <p className={styles.price}>
+                      {item.price ? item.price.toFixed(2) + ' TL' : 'Fiyat Yok'}
+                    </p>
+                    {item.rating !== undefined && (
+                      <p>
+                        <span>Puan:</span> {item.rating} / 5
+                      </p>
+                    )}
+                    {item.description && (
+                      <p className={styles.description}>
+                        {item.description}
+                      </p>
+                    )}
                   </div>
-                )}
-                <div className={styles.cardContent}>
-                  <h3>{item.name}</h3>
-                  <p className={styles.price}>
-                    {item.price ? item.price.toFixed(2) + ' TL' : 'Fiyat Yok'}
-                  </p>
-                  {/* dateOfCreation ve category bilgileri kaldırıldı */}
-                  {item.rating !== undefined && (
-                    <p>
-                      <span>Puan:</span> {item.rating} / 5
-                    </p>
-                  )}
-                  {item.description && (
-                    <p className={styles.description}>
-                      {item.description}
-                    </p>
-                  )}
                 </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
+              ))}
+            </div>
+          </section>
+        );
+      })}
     </div>
   );
-}
+};
 
-export default MenuSayfasi;
+export default MenuPage;
