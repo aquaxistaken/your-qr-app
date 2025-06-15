@@ -1,80 +1,44 @@
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-// Firestore için gerekli fonksiyonları import ediyoruz:
-// doc ve getDoc tek bir belgeyi çekmek için,
-// collection, query ve getDocs koleksiyonlardaki belgeleri çekmek için.
 import { doc, getDoc, collection, query, getDocs } from 'firebase/firestore';
-import { db } from '../../../lib/firebase'; // Firebase bağlantı dosyanızın yolu
+import { db } from '../../../lib/firebase';
 
-import styles from './menu.module.css'; // menu.module.css dosyasının yolu
+import styles from './menu.module.css';
 
-// Font Awesome ikonları için gerekli import'lar
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faUtensils,
-  faCocktail,
-  faCoffee,
-  faBreadSlice,
-  faDrumstickBite,
-  faFish,
-  faIceCream,
-  faCandyCane,
-  faLeaf,
-  faWineGlass,
-  faCookieBite,
-  faPizzaSlice,
-  faCheese,
-  faAppleAlt,
-  faLemon,
-  faBirthdayCake,
-  faHotdog,
-  faHamburger,
-  faCarrot,
-  faMugHot,
-  faGlassMartiniAlt,
-  faBlender,
-  faSeedling,
-  faShoppingBasket,
-  faChampagneGlasses,
-  faLemonade,
-  faCroissant,
-  faCakeCandles,
-  faIceCreamBowl,
-  faGlassWater,
-  faShrimp,
-  faDrumstick,
-  faFishFins
+  faUtensils, faCocktail, faCoffee, faBreadSlice, faDrumstickBite, faFish, faIceCream,
+  faCandyCane, faLeaf, faWineGlass, faCookieBite, faPizzaSlice, faCheese, faAppleAlt,
+  faLemon, faBirthdayCake, faHotdog, faHamburger, faCarrot, faMugHot, faGlassMartiniAlt,
+  faBlender, faSeedling, faShoppingBasket, faChampagneGlasses, faLemonade, faCroissant,
+  faCakeCandles, faIceCreamBowl, faGlassWater, faShrimp, faDrumstick, faFishFins
 } from '@fortawesome/free-solid-svg-icons';
 
-// Kategori Metinleri ve İkonları
-// NOT: Firebase'deki "category" alanındaki değerlerle BİREBİR EŞLEŞMELİDİR.
-// Büyük/küçük harf ve özel karakterler dahil.
-// Kategori Metinleri ve İkonları
+// Kategori Metinleri ve İkonları (Bu kısmı Firebase'deki tüm olası kategori adlarına göre genişletmelisiniz)
 const categoryConfig = {
-  // Firebase'deki "category" alanındaki değerlerle BİREBİR EŞLEŞMELİDİR.
-  // Büyük/küçük harf ve özel karakterler dahil.
-  "Appetizers & Light Bites": { // Firebase'den gelen kategori adı
-    text: 'Başlangıçlar & Hafif Atıştırmalıklar', // Gösterilecek Türkçe metin
+  "Appetizers & Light Bites": {
+    text: 'Başlangıçlar & Hafif Atıştırmalıklar',
     description: 'Hafif ve iştah açıcı lezzetlerle yemeğinize keyifli bir başlangıç yapın.',
     icon: faBreadSlice,
   },
-  "Signature Mains": { // Firebase'den gelen kategori adı
-    text: 'Ana Yemekler & İmza Yemekleri', // Gösterilecek Türkçe metin
+  "Signature Mains": {
+    text: 'Ana Yemekler & İmza Yemekleri',
     description: 'Şeflerimizin özenle hazırladığı, unutulmaz ana yemeklerimizi deneyimleyin.',
     icon: faDrumstickBite,
   },
-  "Beverages & Refreshments": { // Firebase'den gelen kategori adı
-    text: 'İçecekler & Ferahlatıcılar', // Gösterilecek Türkçe metin
+  "Beverages & Refreshments": {
+    text: 'İçecekler & Ferahlatıcılar',
     description: 'Serinletici ve ferahlatıcı içeceklerimizle anın tadını çıkarın.',
-    icon: faGlassMartiniAlt, // Daha uygun bir ikon seçebilirsiniz
+    icon: faGlassMartiniAlt,
   },
-  // Eğer Firebase'de başka kategori isimleri varsa, onları da buraya eklemelisiniz.
-  // Örneğin: "Deniz Ürünleri" için Firebase'de ne yazıyorsa onu anahtar olarak kullanın.
-  // Sadece örnekler, Firebase'deki tam karşılıklarını kullanmalısınız:
-  // "Seafood": { text: 'Deniz Ürünleri', description: 'En taze deniz mahsullerinden hazırlanan özel lezzetler.', icon: faFish, },
-  // "Salads": { text: 'Salatalar', description: 'Sağlıklı ve ferahlatıcı salata çeşitlerimizle öğününüzü hafifletin.', icon: faLeaf, },
-  // "Desserts & Pastries": { text: 'Tatlılar & Pastalar', description: 'Yemeğinizin ardından damaklarınızı şenlendirecek tatlı kaçamaklar.', icon: faBirthdayCake, },
-  // "Hot Drinks": { text: 'Sıcak İçecekler', description: 'Sıcak sohbetlerinize eşlik edecek, özenle demlenmiş içecekler.', icon: faMugHot, },
+  // Yeni eklenen kategori: "Elegant Desserts" (image_306219.png'den görüldüğü gibi)
+  "Elegant Desserts": {
+    text: 'Tatlı Denemeler', // Türkçesini buraya yazın
+    description: 'Şık ve lezzetli tatlılarımızla öğününüzü sonlandırın.',
+    icon: faCakeCandles, // Uygun bir ikon seçin
+  },
+  // Firebase'de olabilecek diğer kategori adlarını buraya eklemeyi unutmayın
+  // Örn: "Salads", "Seafood", "Hot Drinks" vb.
 };
 
 const MenuPage = () => {
@@ -85,7 +49,7 @@ const MenuPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  console.log("router.query.uid:", uid); // UID'nin doğru geldiğini kontrol etmek için
+  console.log("router.query.uid:", uid);
 
   useEffect(() => {
     if (!uid) {
@@ -97,51 +61,55 @@ const MenuPage = () => {
       setLoading(true);
       setError(null);
       try {
-        // Restoran adını getirme (opsiyonel, eğer restoran adını da göstermek istiyorsanız)
-        // KOLEKSİYON ADI DÜZELTİLDİ: 'restaurants' -> 'RestaurantMenu'
+        // Restoran belgesini getirme
         const restaurantDocRef = doc(db, 'RestaurantMenu', uid);
         const restaurantDocSnap = await getDoc(restaurantDocRef);
 
         let currentRestaurantName = `Menü (${uid})`;
+        let menuCollectionName = 'Turkey'; // Varsayılan menü koleksiyonu adı
+
         if (restaurantDocSnap.exists()) {
-          currentRestaurantName = restaurantDocSnap.data().name || `Menü (${uid})`;
+          const data = restaurantDocSnap.data();
+          currentRestaurantName = data.name || `Menü (${uid})`;
+          // Eğer defaultCountry alanı varsa, onu kullan
+          if (data.defaultCountry) {
+            menuCollectionName = data.defaultCountry;
+            console.log(`Restoran ${uid} için menü koleksiyonu: ${menuCollectionName}`);
+          }
         }
         setRestaurantName(currentRestaurantName);
 
-        // Menü öğelerini getirme
+        // Menü öğelerini getirme - Dinamik olarak belirlenen koleksiyon adını kullan
         let items = [];
-        // KOLEKSİYON ADI DÜZELTİLDİ: 'restaurants' -> 'RestaurantMenu'
-        const menuCollectionRef = collection(db, `RestaurantMenu/${uid}/Turkey`); // Turkey'i alt koleksiyon olarak deniyoruz
+        const menuCollectionRef = collection(db, `RestaurantMenu/${uid}/${menuCollectionName}`);
         const q = query(menuCollectionRef);
         const querySnapshot = await getDocs(q);
 
-        if (!querySnapshot.empty) { // Eğer alt koleksiyonda veri varsa
+        if (!querySnapshot.empty) {
           querySnapshot.forEach((docItem) => {
             items.push({ id: docItem.id, ...docItem.data() });
           });
-          console.log("Turkey alt koleksiyon olarak çekildi:", items);
+          console.log(`${menuCollectionName} alt koleksiyonu olarak çekildi:`, items);
         } else {
-          // Eğer Turkey bir alt koleksiyon değil de, restoran belgesinin içinde bir map (harita) ise
-          // (Bu senaryo Firebase yapınıza göre geçerli değil, ama güvenlik için önceki kontrolü tutuyoruz)
+          console.log(`Uyarı: ${menuCollectionName} alt koleksiyonunda öğe bulunamadı veya başka bir yapı var.`);
+          // Bu kısım, alt koleksiyon yerine belgenin içinde map olarak veri tutuluyorsa devreye girer
+          // Mevcut Firebase yapınızda (Turkey/German gibi alt koleksiyonlar) bu kısım muhtemelen çalışmayacaktır.
+          // Yine de eski kodu koruyoruz.
           if (restaurantDocSnap.exists()) {
             const data = restaurantDocSnap.data();
-            if (data.Turkey && typeof data.Turkey === 'object') {
-              // Turkey içindeki her öğeyi alıp diziye dönüştür
-              items = Object.keys(data.Turkey).map(key => ({
-                id: key, // Harita anahtarını ID olarak kullan
-                ...data.Turkey[key] // Tüm alt alanları yay
+            if (data[menuCollectionName] && typeof data[menuCollectionName] === 'object') {
+              items = Object.keys(data[menuCollectionName]).map(key => ({
+                id: key,
+                ...data[menuCollectionName][key]
               }));
-              console.log("Turkey bir field/map olarak çekildi (Bu durum beklenmiyor):", items);
+              console.log(`${menuCollectionName} bir field/map olarak çekildi (Beklenmiyor):`, items);
             }
           }
         }
 
         console.log("Çekilen Menü Öğeleri (Son Kontrol):", items);
 
-        // dateOfCreation'a göre sıralama (eskiden yeniye)
         items.sort((a, b) => {
-          // dateOfCreation alanı Firestore Timestamp ise toDate() metodu kullanılır.
-          // Değilse doğrudan yeni bir Date objesi oluşturulur.
           const dateA = a.dateOfCreation ? (a.dateOfCreation.toDate ? a.dateOfCreation.toDate() : new Date(a.dateOfCreation)) : new Date(0);
           const dateB = b.dateOfCreation ? (b.dateOfCreation.toDate ? b.dateOfCreation.toDate() : new Date(b.dateOfCreation)) : new Date(0);
           return dateA - dateB;
@@ -150,14 +118,14 @@ const MenuPage = () => {
         setMenuItems(items);
       } catch (err) {
         console.error("Menü yüklenirken hata oluştu: ", err);
-        setError("Menü yüklenirken bir hata oluştu: " + err.message); // Hata mesajını daha açıklayıcı yapalım
+        setError("Menü yüklenirken bir hata oluştu: " + err.message);
       } finally {
         setLoading(false);
       }
     };
 
     fetchMenu();
-  }, [uid]); // uid değiştiğinde useEffect'in tekrar çalışmasını sağla
+  }, [uid]);
 
   if (loading) {
     return <div className={styles.container}>Yükleniyor...</div>;
@@ -167,7 +135,6 @@ const MenuPage = () => {
     return <div className={styles.container}>{error}</div>;
   }
 
-  // Menü öğeleri yoksa mesaj göster
   if (menuItems.length === 0) {
     return (
       <div className={styles.container}>
@@ -179,9 +146,8 @@ const MenuPage = () => {
     );
   }
 
-  // Kategorilere göre gruplama
   const groupedByCategory = menuItems.reduce((acc, item) => {
-    const category = item.category || 'Diger'; // Kategori yoksa 'Diger' altında topla
+    const category = item.category || 'Diger';
     if (!acc[category]) {
       acc[category] = [];
     }
@@ -189,7 +155,6 @@ const MenuPage = () => {
     return acc;
   }, {});
 
-  // Kategori sıralamasını belirleme (Opsiyonel: İsterseniz elle sıralayabilirsiniz)
   const sortedCategories = Object.keys(groupedByCategory).sort((a, b) => {
     const configA = categoryConfig[a] || { order: 999 };
     const configB = categoryConfig[b] || { order: 999 };
@@ -207,11 +172,11 @@ const MenuPage = () => {
         const categoryInfo = categoryConfig[categoryKey] || {
           text: categoryKey,
           description: '',
-          icon: faUtensils, // Varsayılan ikon
+          icon: faUtensils,
         };
         const itemsInCategory = groupedByCategory[categoryKey];
 
-        if (itemsInCategory.length === 0) return null; // Kategori boşsa gösterme
+        if (itemsInCategory.length === 0) return null;
 
         return (
           <section key={categoryKey} className={styles.categorySection}>
